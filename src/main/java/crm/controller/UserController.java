@@ -1,7 +1,10 @@
 package crm.controller;
 
+import javax.activation.DataSource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,11 +18,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
+
+import crm.model.User;
+import crm.model.DAO.UserDAO;
+import crm.model.DAO.UserDAOImpl;
+
 
 @Controller
 @RequestMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
+	
+	@Autowired
+	private UserDAO _userdao;
 
 	@RequestMapping(value = { "/", "/welcome**" }, method = RequestMethod.GET)
 	public String defaultPage(Model model) {
@@ -45,10 +55,10 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String login(@RequestParam(value = "error", required = false) String error,
-			@RequestParam(value = "logout", required = false) String logout, HttpServletRequest request, Model model) {
+	public String login(Model model,
+			@RequestParam(value = "error", required = false) String error,
+			@RequestParam(value = "logout", required = false) String logout, HttpServletRequest request) {
 
-		//ModelAndView model = new ModelAndView();
 		if (error != null) {
 			model.addAttribute("error", getErrorMessage(request, "SPRING_SECURITY_LAST_EXCEPTION"));
 		}
@@ -56,11 +66,56 @@ public class UserController {
 		if (logout != null) {
 			model.addAttribute("msg", "You've been logged out successfully.");
 		}
-		//model.setViewName("login");
 
 		return "login";
 
 	}
+	
+	@RequestMapping(value = "/display", method = RequestMethod.GET)
+	public String displayAll(Model model,
+			@RequestParam("name") String name, HttpServletRequest request) {
+
+		
+		
+		
+		User user = _userdao.findByUserName("alex");
+		
+
+		String message = "Hi " + user.getUsername() + "!";
+		model.addAttribute("val", message);
+		
+		return "newUser";
+
+	}
+	
+	@RequestMapping(value = "/newUser", method = RequestMethod.GET)
+	public String addUser(Model model,
+			@RequestParam("name") String name,
+			@RequestParam("password") String password,
+			@RequestParam(value = "error", required = false) String error,
+			HttpServletRequest request) {
+
+		if(error != null)
+		{
+
+			boolean added = _userdao.addNewUser(name, password);
+			String message;
+			if(added)
+			{
+				message = new String("yes");
+			}
+			else
+			{
+				message = new String("no");
+			}
+			model.addAttribute("val", message);
+		}
+		
+		
+		return "newUser";
+
+	}
+	
 
 	// customize the error message
 	private String getErrorMessage(HttpServletRequest request, String key) {

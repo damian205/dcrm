@@ -4,14 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
  
 
+
+
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
  
 
+
+
+
 import crm.model.User;
  
 @Repository
+@Transactional
 public class UserDAOImpl implements UserDAO {
  
 	@Autowired
@@ -33,6 +44,18 @@ public class UserDAOImpl implements UserDAO {
 			return null;
 		}
  
+	}
+	
+
+	public boolean addNewUser(String username, String password) {
+ 
+		User user = new User(username, password);
+		 Session session = this.sessionFactory.openSession();
+		 Transaction tx = session.beginTransaction();
+	        session.persist(user);
+	        tx.commit();
+	        session.close();
+	        	return true;
 	}
  
 }
