@@ -91,16 +91,9 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "/new")
-	public String add(Model model,
-			
+	public String add(Model model,	
 			HttpServletRequest request) {
 
-		
-
-			
-		
-	
-		
 		
 		return "newUser";
 
