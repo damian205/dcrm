@@ -14,10 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+
+
 
 import crm.model.User;
 import crm.model.DAO.UserDAO;
@@ -42,6 +44,23 @@ public class UserController {
 
 	}
 
+	@RequestMapping(value = "/display", method = RequestMethod.GET)
+	public String displayAll(Model model,
+			@RequestParam("name") String name, HttpServletRequest request) {
+
+		
+		
+		
+		User user = _userdao.findByUserName("alex");
+		
+
+		String message = "Hi " + user.getUsername() + "!";
+		model.addAttribute("val", message);
+		
+		return "newUser";
+
+	}
+	
 	@RequestMapping(value = "/admin**", method = RequestMethod.GET)
 	public String adminPage(Model model) {
 
@@ -71,34 +90,30 @@ public class UserController {
 
 	}
 	
-	@RequestMapping(value = "/display", method = RequestMethod.GET)
-	public String displayAll(Model model,
-			@RequestParam("name") String name, HttpServletRequest request) {
+	@RequestMapping(value = "/new")
+	public String add(Model model,
+			
+			HttpServletRequest request) {
 
 		
-		
-		
-		User user = _userdao.findByUserName("alex");
-		
 
-		String message = "Hi " + user.getUsername() + "!";
-		model.addAttribute("val", message);
+			
+		
+	
+		
 		
 		return "newUser";
 
 	}
 	
-	@RequestMapping(value = "/newUser", method = RequestMethod.GET)
+	@RequestMapping(value = "/newUser", method = RequestMethod.POST)
 	public String addUser(Model model,
-			@RequestParam("name") String name,
-			@RequestParam("password") String password,
-			@RequestParam(value = "error", required = false) String error,
+			@ModelAttribute User user,
 			HttpServletRequest request) {
 
-		if(error != null)
-		{
+		
 
-			boolean added = _userdao.addNewUser(name, password);
+			boolean added = _userdao.addNewUser(user.getUsername(), user.getPassword());
 			String message;
 			if(added)
 			{
@@ -109,7 +124,7 @@ public class UserController {
 				message = new String("no");
 			}
 			model.addAttribute("val", message);
-		}
+	
 		
 		
 		return "newUser";
